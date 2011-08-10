@@ -9,7 +9,7 @@ namespace CommonDomain.Core
 	{
 		private readonly IDictionary<Type, Action<TMessage>> handlers = new Dictionary<Type, Action<TMessage>>();
 		private readonly ICollection<TMessage> uncommitted = new LinkedList<TMessage>();
-		private readonly ICollection<TMessage> undispatched = new LinkedList<TMessage>();
+		private readonly ICollection<object> undispatched = new LinkedList<object>();
 
 		public Guid Id { get; protected set; }
 		public int Version { get; private set; }
@@ -35,7 +35,7 @@ namespace CommonDomain.Core
 			this.uncommitted.Clear();
 		}
 
-		protected void Dispatch(TMessage message)
+		void ISaga.Dispatch(object message)
 		{
 			this.undispatched.Add(message);
 		}

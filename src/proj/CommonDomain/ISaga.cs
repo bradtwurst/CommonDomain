@@ -15,5 +15,7 @@ namespace CommonDomain
 
 		ICollection GetUndispatchedMessages();
 		void ClearUndispatchedMessages();
+
+		void Dispatch(object message);
 	}
 }

@@ -69,21 +69,21 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="EventStore, Version=2.0.11157.39, Culture=neutral, PublicKeyToken=7735eb81c0bd9948, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\..\packages\EventStore.2.0.11157\lib\net40\EventStore.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
-    <Reference Include="EventStore" Condition="$(TargetFrameworkVersion)=='v3.5'">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-      <HintPath>..\..\..\lib\eventstore-bin\.NET 3.5\EventStore.dll</HintPath>
-    </Reference>
-    <Reference Include="EventStore" Condition="$(TargetFrameworkVersion)=='v4.0'">
-      <RequiredTargetFramework>4.0</RequiredTargetFramework>
-      <HintPath>..\..\..\lib\eventstore-bin\.NET 4.0\EventStore.dll</HintPath>
-    </Reference>
+    <Reference Include="System.Transactions" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="ExceptionMessages.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>ExceptionMessages.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

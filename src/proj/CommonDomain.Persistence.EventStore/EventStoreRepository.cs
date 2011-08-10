@@ -48,10 +48,16 @@ namespace CommonDomain.Persistence.EventStore
 		public virtual TAggregate GetById<TAggregate>(Guid id, int versionToLoad) where TAggregate : class, IAggregate
 		{
 			var snapshot = this.GetSnapshot(id, versionToLoad);
-			var stream = this.OpenStream(id, versionToLoad, snapshot);
-			var aggregate = this.GetAggregate<TAggregate>(snapshot, stream);
 
-			ApplyEventsToAggregate(versionToLoad, stream, aggregate);
+			Action<IAggregate, IMemento> streamAction = (IAggregate agg, IMemento memento) =>
+			{
+				var inSnapshot = memento == null ? null : snapshot;
+
+				var stream = this.OpenStream(agg, versionToLoad, inSnapshot);
+				ApplyEventsToAggregate(versionToLoad, stream, agg);
+			};
+
+			var aggregate = this.GetAggregate<TAggregate>(typeof(TAggregate), snapshot, id, streamAction);
 
 			return aggregate as TAggregate;
 		}
@@ -61,10 +67,10 @@ namespace CommonDomain.Persistence.EventStore
 				foreach (var @event in stream.CommittedEvents.Select(x => x.Body))
 					aggregate.ApplyEvent(@event);
 		}
-		private IAggregate GetAggregate<TAggregate>(Snapshot snapshot, IEventStream stream)
+		private IAggregate GetAggregate<TAggregate>(Type aggType, Snapshot snapshot, Guid id, Action<IAggregate, IMemento> streamFunc)
 		{
 			var memento = snapshot == null ? null : snapshot.Payload as IMemento;
-			return this.factory.Build(typeof(TAggregate), stream.StreamId, memento);
+			return this.factory.Build(aggType, id, streamFunc, memento);
 		}
 		private Snapshot GetSnapshot(Guid id, int version)
 		{
@@ -74,17 +80,17 @@ namespace CommonDomain.Persistence.EventStore
 
 			return snapshot;
 		}
-		private IEventStream OpenStream(Guid id, int version, Snapshot snapshot)
+		private IEventStream OpenStream(IAggregate agg, int version, Snapshot snapshot)
 		{
 			IEventStream stream;
-			if (this.streams.TryGetValue(id, out stream))
+			if (this.streams.TryGetValue(agg.Id, out stream))
 				return stream;
 
 			stream = snapshot == null
-				? this.eventStore.OpenStream(id, 0, version)
+				? this.eventStore.OpenStream(agg.Id, 0, version)
 				: this.eventStore.OpenStream(snapshot, version);
 
-			return this.streams[id] = stream;
+			return this.streams[agg.Id] = stream;
 		}
 
 		public virtual void Save(IAggregate aggregate, Guid commitId, Action<IDictionary<string, object>> updateHeaders)

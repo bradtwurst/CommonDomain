@@ -9,7 +9,7 @@ namespace CommonDomain.Persistence.EventStore
 	public class SagaEventStoreRepository : ISagaRepository, IDisposable
 	{
 		private const string SagaTypeHeader = "SagaType";
-		private const string UndispatchedMessageHeader = "UndispatchedMessage.";
+		public const string UndispatchedMessageHeader = "UndispatchedMessage.";
 		private readonly IDictionary<Guid, IEventStream> streams = new Dictionary<Guid, IEventStream>();
 		private readonly IStoreEvents eventStore;
 

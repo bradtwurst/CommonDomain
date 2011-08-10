@@ -15,7 +15,7 @@ namespace CommonDomain.Core
 		public int Version { get; private set; }
 
 		protected void Register<TRegisteredMessage>(Action<TRegisteredMessage> handler)
-			where TRegisteredMessage : class, TMessage
+			where TRegisteredMessage : class
 		{
 			this.handlers[typeof(TRegisteredMessage)] = message => handler(message as TRegisteredMessage);
 		}

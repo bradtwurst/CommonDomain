@@ -7,8 +7,8 @@ namespace CommonDomain.Core
 	public class SagaBase<TMessage> : ISaga, IEquatable<ISaga>
 		where TMessage : class
 	{
-		private readonly IDictionary<Type, Action<TMessage>> handlers = new Dictionary<Type, Action<TMessage>>();
-		private readonly ICollection<TMessage> uncommitted = new LinkedList<TMessage>();
+		private readonly IDictionary<Type, Action<object>> handlers = new Dictionary<Type, Action<object>>();
+		private readonly ICollection<object> uncommitted = new LinkedList<object>();
 		private readonly ICollection<object> undispatched = new LinkedList<object>();
 
 		public Guid Id { get; protected set; }
@@ -22,8 +22,10 @@ namespace CommonDomain.Core
 
 		public void Transition(object message)
 		{
-			this.handlers[message.GetType()](message as TMessage);
-			this.uncommitted.Add(message as TMessage);
+			var key = message.GetType();
+			var handler = this.handlers[key];
+			handler(message);
+			this.uncommitted.Add(message);
 			this.Version++;
 		}
 		ICollection ISaga.GetUncommittedEvents()
